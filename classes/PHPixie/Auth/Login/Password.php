@@ -63,7 +63,7 @@ class Password extends Provider {
 	public function __construct($pixie, $service, $config) {
 		parent::__construct($pixie, $service, $config);
 		$this->password_field = $pixie->config->get($this->config_prefix."password_field");
-		$this->hash_method = $pixie->config->get($this->config_prefix."hash_method", 'md5');
+		$this->hash_method = $pixie->config->get($this->config_prefix."hash_method", 'sha256');
 		
         $repository = $pixie->config->get($this->config_prefix."repository", 'ORM');
         $this->repository = $pixie->auth->repository($repository, $this->service, $this->config_prefix);
@@ -126,7 +126,7 @@ class Password extends Provider {
             }
         } elseif($this->hash_method) {
             $salted = explode(':', $challenge);
-            $password = hash($this->hash_method, $password.$salted[1]);
+            $password = hash($this->hash_method, $password);
             $challenge = $salted[0];
         }
         if ($challenge === $password) {
@@ -240,7 +240,7 @@ class Password extends Provider {
 			return crypt($password, '$2y$10$'.$salt);
 		}
 		$salt = uniqid(rand());
-		return hash($this->hash_method, $password.$salt).':'.$salt;
+		return hash($this->hash_method, $password);
 	}
 	
 	/**
